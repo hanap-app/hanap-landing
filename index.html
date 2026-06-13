@@ -925,7 +925,9 @@ function submitPlayer() {
     method: 'POST',
     headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
-  }).then(r => console.log('[hanap] Player submit status:', r.status)).catch(e => console.warn('[hanap] Player submit error:', e));
+  })
+  .then(r => { console.log('[hanap] Player submit status:', r.status); })
+  .catch(e => { console.warn('[hanap] Player submit error:', e); });
 
   document.getElementById('player-form-wrap').style.display = 'none';
   document.getElementById('player-success').classList.add('show');
