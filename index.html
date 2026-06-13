@@ -925,7 +925,7 @@ function submitPlayer() {
     method: 'POST',
     headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
-  }).catch(e => console.warn('Formspree error:', e));
+  }).then(r => console.log('[hanap] Player submit status:', r.status)).catch(e => console.warn('[hanap] Player submit error:', e));
 
   document.getElementById('player-form-wrap').style.display = 'none';
   document.getElementById('player-success').classList.add('show');
@@ -951,7 +951,7 @@ function submitMerchant() {
     method: 'POST',
     headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
-  }).catch(e => console.warn('Formspree error:', e));
+  }).then(r => console.log('[hanap] Merchant submit status:', r.status)).catch(e => console.warn('[hanap] Merchant submit error:', e));
 
   document.getElementById('merchant-form-wrap').style.display = 'none';
   document.getElementById('merchant-success').classList.add('show');
@@ -976,7 +976,7 @@ function submitQuestionnaire() {
     method: 'POST',
     headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
-  }).catch(e => console.warn('Formspree error:', e));
+  }).then(r => console.log('[hanap] Questionnaire submit status:', r.status)).catch(e => console.warn('[hanap] Questionnaire submit error:', e));
 
   document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.progress-dot').forEach(d => d.classList.add('done'));
