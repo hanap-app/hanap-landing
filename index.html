@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>hanap — Mag-hunt. Manalo. Lumabas.</title>
+<meta name="description" content="Ang bagong treasure hunt game sa Siargao. Mag-hunt ng mga chest sa paligid mo. Manalo ng rewards. Lumabas na!">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --flame: #FF5C2E;
+  --night: #0D1117;
+  --ocean: #1E3A5F;
+  --sand:  #F5F0E8;
+  --gold:  #FFD700;
+  --border: rgba(245,240,232,0.10);
+  --text-primary: #F5F0E8;
+  --text-secondary: rgba(245,240,232,0.60);
+  --text-tertiary:  rgba(245,240,232,0.35);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--night);
+  color: var(--text-primary);
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── LAYOUT ── */
+.container { max-width: 520px; margin: 0 auto; padding: 0 20px; }
+section { padding: 64px 0; }
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 14px 20px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  background: rgba(13,17,23,0.88);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo {
+  font-family: 'Nunito', sans-serif; font-weight: 900;
+  font-size: 22px; color: var(--sand); text-decoration: none; letter-spacing: -0.5px;
+}
+.nav-logo span { color: var(--flame); }
+.nav-right { display: flex; align-items: center; gap: 8px; }
+
+/* Language toggle */
+.lang-toggle {
+  display: flex; background: rgba(245,240,232,0.07);
+  border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+}
+.lang-btn {
+  padding: 5px 11px; font-family: 'Inter', sans-serif; font-weight: 600;
+  font-size: 12px; letter-spacing: 0.04em; cursor: pointer;
+  border: none; background: transparent; color: var(--text-tertiary);
+  transition: all 0.18s;
+}
+.lang-btn.active { background: var(--flame); color: #fff; }
+
+.nav-cta {
+  padding: 8px 16px; background: var(--flame); color: #fff;
+  border-radius: 10px; font-size: 13px; font-weight: 600;
+  text-decoration: none; white-space: nowrap;
+}
+
+/* ── HERO ── */
+.hero {
+  min-height: 100svh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 100px 20px 60px; position: relative; overflow: hidden;
+}
+.hero::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 50% at 50% 60%, rgba(255,92,46,0.13) 0%, transparent 70%);
+  pointer-events: none;
+}
+.stars { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.star {
+  position: absolute; border-radius: 50%; background: var(--sand);
+  opacity: 0; animation: twinkle var(--d,3s) var(--delay,0s) infinite;
+}
+@keyframes twinkle { 0%,100%{opacity:0} 50%{opacity:var(--op,0.4)} }
+
+.chest-hero { position: relative; width: 96px; height: 96px; margin: 0 auto 32px; }
+.chest-ring {
+  position: absolute; border-radius: 50%; border: 1.5px solid rgba(255,92,46,0.28);
+  animation: rpulse 2.2s ease-in-out infinite;
+}
+.chest-ring:nth-child(1) { inset: -14px; }
+.chest-ring:nth-child(2) { inset: -26px; border-color: rgba(255,92,46,0.13); animation-delay: 0.35s; }
+.chest-ring:nth-child(3) { inset: -40px; border-color: rgba(255,92,46,0.06); animation-delay: 0.7s; }
+@keyframes rpulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.06);opacity:0.5} }
+
+.chest-icon {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  background: var(--flame); border-radius: 22px; font-size: 46px;
+  animation: cfloat 3s ease-in-out infinite;
+  box-shadow: 0 0 28px rgba(255,92,46,0.55), 0 0 56px rgba(255,92,46,0.18);
+}
+@keyframes cfloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)} }
+
+.hero-logo { font-family:'Nunito',sans-serif; font-weight:900; font-size:clamp(40px,10vw,56px); letter-spacing:-1px; margin-bottom:6px; }
+.hero-logo span { color:var(--flame); }
+.hero-tagline { font-size:12px; font-weight:500; letter-spacing:0.16em; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:28px; }
+.hero-headline { font-family:'Nunito',sans-serif; font-weight:900; font-size:clamp(26px,7vw,40px); line-height:1.15; margin-bottom:14px; }
+.hero-headline .accent { color:var(--flame); }
+.hero-sub { font-size:16px; color:var(--text-secondary); margin-bottom:40px; max-width:340px; margin-left:auto; margin-right:auto; line-height:1.65; }
+.hero-btns { display:flex; flex-direction:column; gap:10px; width:100%; max-width:340px; }
+
+.scroll-hint {
+  position:absolute; bottom:24px; left:50%; transform:translateX(-50%);
+  color:var(--text-tertiary); font-size:11px; letter-spacing:0.08em; text-transform:uppercase;
+  display:flex; flex-direction:column; align-items:center; gap:5px;
+  animation:sbounce 2.2s ease-in-out infinite;
+}
+.scroll-hint::after { content:'↓'; font-size:15px; }
+@keyframes sbounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(5px)} }
+
+/* ── BUTTONS ── */
+.btn {
+  display:inline-flex; align-items:center; justify-content:center; gap:7px;
+  padding:15px 24px; border-radius:13px; font-family:'Inter',sans-serif;
+  font-weight:600; font-size:15px; cursor:pointer; border:none;
+  transition:transform 0.14s, box-shadow 0.14s, opacity 0.14s;
+  text-decoration:none; width:100%;
+}
+.btn:active { transform:scale(0.97); }
+.btn-primary { background:var(--flame); color:#fff; box-shadow:0 4px 22px rgba(255,92,46,0.35); }
+.btn-primary:hover { box-shadow:0 6px 30px rgba(255,92,46,0.5); }
+.btn-secondary { background:transparent; color:var(--flame); border:1.5px solid var(--flame); }
+.btn-secondary:hover { background:rgba(255,92,46,0.06); }
+.btn-ghost { background:rgba(245,240,232,0.05); color:var(--text-secondary); border:1px solid var(--border); font-size:14px; padding:13px 22px; }
+.btn-sm { padding:9px 18px; border-radius:9px; font-size:13px; width:auto; }
+
+/* ── HOW IT WORKS ── */
+.how-section { background:var(--ocean); }
+.steps { display:flex; flex-direction:column; gap:22px; margin-bottom:36px; }
+.step-item { display:flex; gap:15px; align-items:flex-start; }
+.step-num {
+  width:40px; height:40px; min-width:40px; border-radius:11px;
+  background:rgba(255,92,46,0.14); border:1px solid rgba(255,92,46,0.28);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Nunito',sans-serif; font-weight:900; font-size:18px; color:var(--flame);
+}
+.step-text { flex:1; padding-top:5px; }
+.step-text strong { display:block; font-size:15px; font-weight:600; color:var(--sand); margin-bottom:2px; }
+.step-text span { font-size:13px; color:var(--text-secondary); }
+
+.highlight-box {
+  background:rgba(255,92,46,0.08); border:1px solid rgba(255,92,46,0.2);
+  border-radius:16px; padding:20px; text-align:center;
+}
+.highlight-box .hb-icon { font-size:30px; margin-bottom:10px; }
+.highlight-box .hb-title { font-family:'Nunito',sans-serif; font-weight:900; font-size:18px; color:var(--sand); margin-bottom:6px; }
+.highlight-box .hb-body { font-size:13px; color:var(--text-secondary); }
+
+/* ── SECTION LABELS ── */
+.pill {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:5px 12px; border-radius:999px; font-size:12px; font-weight:500;
+  background:rgba(255,92,46,0.12); color:var(--flame);
+  border:1px solid rgba(255,92,46,0.2); margin-bottom:14px;
+}
+.section-title { font-family:'Nunito',sans-serif; font-weight:900; font-size:clamp(24px,6vw,34px); line-height:1.2; margin-bottom:10px; }
+.section-body { font-size:15px; color:var(--text-secondary); line-height:1.7; margin-bottom:28px; }
+
+/* ── TABS ── */
+.tabs { display:flex; background:rgba(245,240,232,0.05); border-radius:11px; padding:4px; margin-bottom:28px; border:1px solid var(--border); }
+.tab-btn { flex:1; padding:10px; border-radius:8px; border:none; background:transparent; color:var(--text-secondary); font-family:'Inter',sans-serif; font-weight:500; font-size:14px; cursor:pointer; transition:all 0.18s; }
+.tab-btn.active { background:var(--flame); color:#fff; }
+.tab-content { display:none; }
+.tab-content.active { display:block; }
+
+/* ── FORM ── */
+.form-group { margin-bottom:18px; }
+.form-label { display:block; font-size:13px; font-weight:500; color:var(--text-secondary); margin-bottom:7px; }
+.form-input, .form-select, .form-textarea {
+  width:100%; padding:13px 15px; background:rgba(245,240,232,0.05);
+  border:1px solid var(--border); border-radius:11px; color:var(--sand);
+  font-family:'Inter',sans-serif; font-size:15px; transition:border-color 0.18s; appearance:none;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus { outline:none; border-color:var(--flame); background:rgba(255,92,46,0.04); }
+.form-input::placeholder, .form-textarea::placeholder { color:var(--text-tertiary); }
+.form-select option { background:var(--ocean); color:var(--sand); }
+.form-textarea { resize:vertical; min-height:78px; line-height:1.5; }
+
+.radio-group { display:flex; flex-direction:column; gap:9px; }
+.radio-option {
+  display:flex; align-items:center; gap:11px; padding:13px 15px;
+  background:rgba(245,240,232,0.04); border:1px solid var(--border);
+  border-radius:11px; cursor:pointer; transition:all 0.14s; font-size:14px; color:var(--text-secondary);
+}
+.radio-option:hover { border-color:rgba(255,92,46,0.3); }
+.radio-option input[type="radio"] { accent-color:var(--flame); width:17px; height:17px; }
+.radio-option.selected { border-color:var(--flame); background:rgba(255,92,46,0.08); color:var(--sand); }
+
+/* Star rating */
+.star-rating { display:flex; gap:6px; justify-content:center; }
+.star-btn { font-size:30px; background:none; border:none; cursor:pointer; transition:transform 0.13s; filter:grayscale(1); opacity:0.35; padding:4px; }
+.star-btn.selected, .star-btn:hover { filter:grayscale(0); opacity:1; transform:scale(1.18); }
+
+/* ── QUESTIONNAIRE ── */
+.questionnaire-section { border-top:1px solid var(--border); }
+.form-card { background:rgba(245,240,232,0.03); border:1px solid var(--border); border-radius:18px; padding:26px 22px; }
+.form-step { display:none; }
+.form-step.active { display:block; }
+.form-progress { display:flex; gap:5px; margin-bottom:26px; }
+.progress-dot { height:3px; flex:1; border-radius:999px; background:var(--border); transition:background 0.28s; }
+.progress-dot.done { background:var(--flame); }
+.form-step-label { font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--flame); margin-bottom:7px; }
+.form-step-title { font-family:'Nunito',sans-serif; font-weight:900; font-size:20px; color:var(--sand); margin-bottom:18px; line-height:1.3; }
+
+/* ── MERCHANT CARDS ── */
+.merchant-card { background:rgba(245,240,232,0.04); border:1px solid var(--border); border-radius:14px; padding:18px; margin-bottom:14px; display:flex; gap:13px; align-items:flex-start; }
+.merchant-icon { font-size:26px; flex-shrink:0; width:46px; height:46px; display:flex; align-items:center; justify-content:center; background:rgba(255,92,46,0.1); border-radius:11px; }
+.merchant-card-title { font-weight:600; color:var(--sand); font-size:14px; margin-bottom:3px; }
+.merchant-card-body { font-size:13px; color:var(--text-secondary); line-height:1.5; }
+
+/* ── SUCCESS ── */
+.success-screen { display:none; text-align:center; padding:36px 0; }
+.success-screen.show { display:block; }
+.success-emoji { font-size:58px; margin-bottom:14px; animation:cfloat 3s ease-in-out infinite; }
+.success-title { font-family:'Nunito',sans-serif; font-weight:900; font-size:26px; color:var(--sand); margin-bottom:8px; }
+.success-body { font-size:15px; color:var(--text-secondary); line-height:1.7; }
+
+/* ── FOOTER ── */
+footer { border-top:1px solid var(--border); padding:30px 20px; text-align:center; color:var(--text-tertiary); font-size:12px; }
+.footer-logo { font-family:'Nunito',sans-serif; font-weight:900; font-size:20px; color:var(--sand); margin-bottom:8px; }
+.footer-logo span { color:var(--flame); }
+
+.divider { height:1px; background:var(--border); margin:24px 0; }
+
+@media (max-width:380px) {
+  .hero-logo { font-size:36px; }
+  .chest-hero { width:78px; height:78px; }
+  .chest-icon { font-size:36px; }
+  .lang-btn { padding:5px 8px; font-size:11px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  *, *::before, *::after { animation-duration:0.01ms !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#top" class="nav-logo">ha<span>nap</span></a>
+  <div class="nav-right">
+    <div class="lang-toggle">
+      <button class="lang-btn active" onclick="setLang('tl',this)" id="btn-tl">TL</button>
+      <button class="lang-btn" onclick="setLang('en',this)" id="btn-en">EN</button>
+    </div>
+    <a href="#waitlist" class="nav-cta" data-i="nav_cta">Sumali →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="stars" id="stars"></div>
+  <div class="chest-hero">
+    <div class="chest-ring"></div>
+    <div class="chest-ring"></div>
+    <div class="chest-ring"></div>
+    <div class="chest-icon">🏴‍☠️</div>
+  </div>
+  <div class="hero-logo">ha<span>nap</span></div>
+  <div class="hero-tagline" data-i="hero_tagline">Mag-hunt · Manalo · Lumabas</div>
+  <h1 class="hero-headline">
+    <span data-i="hero_h1_1">May</span>
+    <span class="accent" data-i="hero_h1_accent"> nakatago</span><br>
+    <span data-i="hero_h1_2">sa General Luna.</span>
+  </h1>
+  <p class="hero-sub" data-i="hero_sub">Ang unang treasure hunt game para sa mga taga-Siargao. Real places. Real rewards. Lumabas ka.</p>
+  <div class="hero-btns">
+    <a href="#waitlist" class="btn btn-primary" data-i="hero_cta1">Gusto ko sumali! →</a>
+    <a href="#questionnaire" class="btn btn-ghost" data-i="hero_cta2">Nalaro ka na? Ibahagi ang experience mo</a>
+  </div>
+  <div class="scroll-hint" data-i="scroll_hint">Alamin pa</div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section" id="how">
+  <div class="container">
+    <div class="pill" data-i="how_pill">🗺️ Paano ito gumagana</div>
+    <h2 class="section-title" data-i="how_title">Simple. Fun. IRL.</h2>
+    <p class="section-body" data-i="how_body">Hindi ito video game. Lalabas ka talaga. Maglalakad ka. Makakahanap ka ng bagay sa tunay na mundo — kasama ang iyong mga kaibigan.</p>
+    <div class="steps">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <div class="step-text">
+          <strong data-i="step1_title">Kumuha ng indicio</strong>
+          <span data-i="step1_body">May photo ka matatanggap. Kilala mo ba ang lugar?</span>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div class="step-text">
+          <strong data-i="step2_title">Lumabas at hanapin</strong>
+          <span data-i="step2_body">Lakad, tumakbo, o sumakay kasama ang iyong barkada. Ang susunod na clue ay naghihintay.</span>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <div class="step-text">
+          <strong data-i="step3_title">Pit stop sa lokal na tindahan</strong>
+          <span data-i="step3_body">Ang bawat clue ay nagdadala sa iyo sa isang lugar sa General Luna. Free drink. Susunod na clue.</span>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">4</div>
+        <div class="step-text">
+          <strong data-i="step4_title">Hanap ang coffre — manalo!</strong>
+          <span data-i="step4_body">Una makarating sa huling lugar, siya ang nagdadala ng prize. Lahat ng naglaro ay nanalo ng something.</span>
+        </div>
+      </div>
+    </div>
+    <div class="highlight-box">
+      <div class="hb-icon">🔥</div>
+      <div class="hb-title" data-i="hb_title">Hanap app — coming soon</div>
+      <div class="hb-body" data-i="hb_body">Araw-araw. Bagong chest. Bagong adventure. Sa lahat ng barangay ng Siargao.</div>
+    </div>
+  </div>
+</section>
+
+<!-- WAITLIST -->
+<section id="waitlist">
+  <div class="container">
+    <div class="pill" data-i="wl_pill">✉️ Maging una</div>
+    <h2 class="section-title" data-i="wl_title">Sumali sa waitlist</h2>
+    <p class="section-body" data-i="wl_body">Kapag lumabas na ang app, ikaw ang unang makakaalam. Libre. Walang spam. Promise.</p>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('player')" data-i="tab_player">🏹 Player ako</button>
+      <button class="tab-btn" onclick="switchTab('merchant')" data-i="tab_merchant">🏪 May tindahan ako</button>
+    </div>
+
+    <!-- PLAYER -->
+    <div id="tab-player" class="tab-content active">
+      <div id="player-form-wrap">
+        <div class="form-group">
+          <label class="form-label" data-i="p_name_label">Pangalan mo (o Hunter name)</label>
+          <input type="text" class="form-input" id="player-name" data-i-ph="p_name_ph">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i="p_phone_label">Phone number (para ma-notify ka)</label>
+          <input type="tel" class="form-input" id="player-phone" placeholder="+63 9XX XXX XXXX">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i="p_brgy_label">Saang barangay ka?</label>
+          <select class="form-select" id="player-barangay">
+            <option value="" data-i="opt_pick">Piliin ang barangay mo</option>
+            <option>General Luna (Poblacion)</option>
+            <option>Catangnan</option><option>Malinao</option><option>Union</option>
+            <option>Libertad</option><option>Burgos</option><option>Dapa</option>
+            <option data-i="opt_other_brgy">Ibang barangay sa Siargao</option>
+            <option data-i="opt_tourist">Tourist / Expat ako</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i="p_style_label">Kasama mo sa laro?</label>
+          <div class="radio-group">
+            <label class="radio-option" onclick="selectRadio(this)"><input type="radio" name="play-style" value="solo"><span data-i="p_solo">Solo ako madalas</span></label>
+            <label class="radio-option" onclick="selectRadio(this)"><input type="radio" name="play-style" value="barkada"><span data-i="p_barkada">Kasama lagi ang barkada ko</span></label>
+            <label class="radio-option" onclick="selectRadio(this)"><input type="radio" name="play-style" value="depende"><span data-i="p_depende">Depende sa araw</span></label>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="submitPlayer()" data-i="p_submit">I-notify ako kapag ready na! 🏴‍☠️</button>
+      </div>
+      <div id="player-success" class="success-screen">
+        <div class="success-emoji">🎉</div>
+        <div class="success-title" data-i="p_success_title">Panalo! Registered ka na.</div>
+        <div class="success-body" data-i="p_success_body">Ikaw na ang isa sa mga unang Hunters ng Siargao. I-share mo ito sa iyong barkada!</div>
+        <div style="margin-top:22px;display:flex;flex-direction:column;gap:10px">
+          <a href="https://www.facebook.com/sharer/sharer.php?u=hanap.gg" target="_blank" class="btn btn-primary" data-i="share_fb">I-share sa Facebook 👥</a>
+          <button class="btn btn-ghost" onclick="document.getElementById('questionnaire').scrollIntoView({behavior:'smooth'})" data-i="goto_q">Nalaro ka? Ibahagi ang experience →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MERCHANT -->
+    <div id="tab-merchant" class="tab-content">
+      <div class="merchant-card">
+        <div class="merchant-icon">📍</div>
+        <div>
+          <div class="merchant-card-title" data-i="m_card1_title">Ang tindahan mo = treasure spot</div>
+          <div class="merchant-card-body" data-i="m_card1_body">Ang mga players ng hanap ay darating sa iyong tindahan para hanapin ang susunod na clue — at mag-redeem ng rewards.</div>
+        </div>
+      </div>
+      <div class="merchant-card">
+        <div class="merchant-icon">📊</div>
+        <div>
+          <div class="merchant-card-title" data-i="m_card2_title">Dashboard para sa iyo</div>
+          <div class="merchant-card-body" data-i="m_card2_body">Makikita mo kung ilang players ang dumaan, anong oras, at kung gaano ka-epektibo ang iyong vouchers.</div>
+        </div>
+      </div>
+      <div class="merchant-card">
+        <div class="merchant-icon">💰</div>
+        <div>
+          <div class="merchant-card-title" data-i="m_card3_title">Simula sa ₱500/buwan</div>
+          <div class="merchant-card-body" data-i="m_card3_body">Para sa mga lokal na tindahan, café, surf shop, at activities. Trial period libre.</div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div id="merchant-form-wrap">
+        <div class="form-group">
+          <label class="form-label" data-i="m_name_label">Pangalan ng tindahan</label>
+          <input type="text" class="form-input" id="merchant-name" data-i-ph="m_name_ph">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i="m_type_label">Uri ng tindahan</label>
+          <select class="form-select" id="merchant-type">
+            <option value="" data-i="opt_pick">Piliin ang uri</option>
+            <option data-i="m_type_cafe">Café / Restaurant</option>
+            <option data-i="m_type_surf">Surf shop / Equipment rental</option>
+            <option data-i="m_type_accom">Accommodation (hostel / resort)</option>
+            <option data-i="m_type_activity">Activity / Tour</option>
+            <option data-i="m_type_sari">Sari-sari store / Grocery</option>
+            <option data-i="m_type_other">Iba pa</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i="m_phone_label">Phone number / contact</label>
+          <input type="tel" class="form-input" id="merchant-phone" placeholder="+63 9XX XXX XXXX">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i="m_brgy_label">Saang barangay?</label>
+          <select class="form-select" id="merchant-barangay">
+            <option value="" data-i="opt_pick2">Piliin</option>
+            <option>General Luna (Tourism Road)</option>
+            <option>Catangnan</option><option>Malinao</option>
+            <option data-i="opt_other_area">Ibang lugar</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="submitMerchant()" data-i="m_submit">Gusto ko maging partner! 🏪</button>
+      </div>
+      <div id="merchant-success" class="success-screen">
+        <div class="success-emoji">🏪</div>
+        <div class="success-title" data-i="m_success_title">Salamat! Kukuha kami ng ugnayan.</div>
+        <div class="success-body" data-i="m_success_body">Isa ka sa mga unang merchant partners ng hanap sa Siargao. Makikipag-ugnayan kami sa iyo para sa libreng trial.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- QUESTIONNAIRE -->
+<section class="questionnaire-section" id="questionnaire">
+  <div class="container">
+    <div class="pill" data-i="q_pill">📋 Nalaro ka na?</div>
+    <h2 class="section-title" data-i="q_title">Ibahagi ang experience mo</h2>
+    <p class="section-body" data-i="q_body">2 minuto lang. Ang sagot mo ay makakatulong sa amin para gawing mas masaya ang hanap para sa lahat ng taga-Siargao.</p>
+
+    <div class="form-card">
+      <div class="form-progress">
+        <div class="progress-dot done" id="dot-1"></div>
+        <div class="progress-dot" id="dot-2"></div>
+        <div class="progress-dot" id="dot-3"></div>
+        <div class="progress-dot" id="dot-4"></div>
+        <div class="progress-dot" id="dot-5"></div>
+      </div>
+
+      <!-- Q1 -->
+      <div class="form-step active" id="q-step-1">
+        <div class="form-step-label" data-i="q1_label">Tanong 1 / 5</div>
+        <div class="form-step-title" data-i="q1_title">Gaano ka-saya ang laro? 🎯</div>
+        <div class="star-rating" id="rating-stars">
+          <button class="star-btn" data-val="1" onclick="setRating(1)">😐</button>
+          <button class="star-btn" data-val="2" onclick="setRating(2)">🙂</button>
+          <button class="star-btn" data-val="3" onclick="setRating(3)">😄</button>
+          <button class="star-btn" data-val="4" onclick="setRating(4)">🤩</button>
+          <button class="star-btn" data-val="5" onclick="setRating(5)">🔥</button>
+        </div>
+        <div style="margin-top:22px">
+          <button class="btn btn-primary" onclick="nextStep(2)" id="btn-step-1" disabled data-i="q_next">Susunod →</button>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="form-step" id="q-step-2">
+        <div class="form-step-label" data-i="q2_label">Tanong 2 / 5</div>
+        <div class="form-step-title" data-i="q2_title">Anong pinaka-masaya para sa iyo?</div>
+        <div class="radio-group">
+          <label class="radio-option" onclick="selectRadio(this)"><input type="radio" name="fun-part" value="solving"><span data-i="q2_opt1">Ang pag-solve ng clues 🧩</span></label>
+          <label class="radio-option" onclick="selectRadio(this)"><input type="radio" name="fun-part" value="racing"><span data-i="q2_opt2">Ang pagtakbo at kumpetisyon 🏃</span></label>
+          <label class="radio-option" onclick="selectRadio(this)"><input type="radio" name="fun-part" value="barkada"><span data-i="q2_opt3">Ang kasama ko (barkada feeling) 👥</span></label>
+          <label class="radio-option" onclick="selectRadio(this)"><input type="radio" name="fun-part" value="exploring"><span data-i="q2_opt4">Ang pagdiskubre ng mga lugar 📍</span></label>
+          <label class="radio-option" onclick="selectRadio(this)"><input type="radio" name="fun-part" value="all"><span data-i="q2_opt5">Lahat! 🎉</span></label>
+        </div>
+        <div style="margin-top:18px;display:flex;gap:9px">
+          <button class="btn btn-ghost btn-sm" onclick="prevStep(1)" data-i="q_back">← Back</button>
+          <button class="btn btn-primary" onclick="nextStep(3)" data-i="q_next">Susunod →</button>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="form-step" id="q-step-3">
+        <div class="form-step-label" data-i="q3_label">Tanong 3 / 5</div>
+        <div class="form-step-title" data-i="q3_title">Kung araw-araw may bagong treasure hunt sa Siargao...</div>
+        <div class="radio-group">
+          <label class="radio-option" onclick="selectRadio(this)"><input type="radio" name="daily" value="yes-daily"><span data-i="q3_opt1">Lalaro ako araw-araw! 🔥</span></label>
+          <label class="radio-option" onclick="selectRadio(this)"><input type="radio" name="daily" value="few-times"><span data-i="q3_opt2">Ilang beses sa linggo 📅</span></label>
+          <label class="radio-option" onclick="selectRadio(this)"><input type="radio" name="daily" value="weekends"><span data-i="q3_opt3">Weekend lang 🌴</span></label>
+          <label class="radio-option" onclick="selectRadio(this)"><input type="radio" name="daily" value="special"><span data-i="q3_opt4">Pag-may special event lang</span></label>
+        </div>
+        <div style="margin-top:18px;display:flex;gap:9px">
+          <button class="btn btn-ghost btn-sm" onclick="prevStep(2)" data-i="q_back">← Back</button>
+          <button class="btn btn-primary" onclick="nextStep(4)" data-i="q_next">Susunod →</button>
+        </div>
+      </div>
+
+      <!-- Q4 -->
+      <div class="form-step" id="q-step-4">
+        <div class="form-step-label" data-i="q4_label">Tanong 4 / 5</div>
+        <div class="form-step-title" data-i="q4_title">Anong pwedeng gawing mas masaya? 💡</div>
+        <div class="form-group">
+          <textarea class="form-textarea" id="suggestion-text" data-i-ph="q4_ph" rows="4"></textarea>
+        </div>
+        <div style="display:flex;gap:9px">
+          <button class="btn btn-ghost btn-sm" onclick="prevStep(3)" data-i="q_back">← Back</button>
+          <button class="btn btn-primary" onclick="nextStep(5)" data-i="q_next">Susunod →</button>
+        </div>
+      </div>
+
+      <!-- Q5 -->
+      <div class="form-step" id="q-step-5">
+        <div class="form-step-label" data-i="q5_label">Tanong 5 / 5</div>
+        <div class="form-step-title" data-i="q5_title">Sino ka? (Para ma-notify ka ng launch 🚀)</div>
+        <div class="form-group">
+          <label class="form-label" data-i="q5_name_label">Pangalan o Hunter name</label>
+          <input type="text" class="form-input" id="q-name" data-i-ph="q5_name_ph">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i="q5_phone_label">Phone number</label>
+          <input type="tel" class="form-input" id="q-phone" placeholder="+63 9XX XXX XXXX">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i="q5_brgy_label">Barangay mo</label>
+          <select class="form-select" id="q-barangay">
+            <option value="" data-i="opt_pick">Piliin</option>
+            <option>General Luna (Poblacion)</option>
+            <option>Catangnan</option><option>Malinao</option><option>Union</option>
+            <option>Libertad</option><option>Burgos</option><option>Dapa</option>
+            <option data-i="opt_other_brgy">Ibang barangay sa Siargao</option>
+            <option data-i="opt_tourist">Tourist / Expat</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:9px">
+          <button class="btn btn-ghost btn-sm" onclick="prevStep(4)" data-i="q_back">← Back</button>
+          <button class="btn btn-primary" onclick="submitQuestionnaire()" data-i="q_submit">Isumite! 🏴‍☠️</button>
+        </div>
+      </div>
+
+      <!-- Success -->
+      <div id="q-success" class="success-screen">
+        <div class="success-emoji">🏴‍☠️</div>
+        <div class="success-title" data-i="q_success_title">Salamat, Hunter!</div>
+        <div class="success-body" data-i="q_success_body">Ang feedback mo ay makakatulong sa amin para gawing mas masaya ang hanap para sa buong Siargao. I-notify namin ikaw kapag lumabas na ang app.</div>
+        <div style="margin-top:22px">
+          <a href="https://www.facebook.com/sharer/sharer.php?u=hanap.gg" target="_blank" class="btn btn-primary" data-i="share_fb">I-share sa iyong barkada 👥</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">ha<span>nap</span></div>
+  <div style="margin-bottom:5px">Siargao, Philippines 🇵🇭</div>
+  <div data-i="footer_copy">© 2025 hanap · Mag-hunt. Manalo. Lumabas.</div>
+</footer>
+
+<script>
+/* ─────────────────────────────────────────────
+   TRANSLATIONS
+───────────────────────────────────────────── */
+const T = {
+  tl: {
+    nav_cta: "Sumali →",
+    hero_tagline: "Mag-hunt · Manalo · Lumabas",
+    hero_h1_1: "May",
+    hero_h1_accent: " nakatago",
+    hero_h1_2: "sa General Luna.",
+    hero_sub: "Ang unang treasure hunt game para sa mga taga-Siargao. Real places. Real rewards. Lumabas ka.",
+    hero_cta1: "Gusto ko sumali! →",
+    hero_cta2: "Nalaro ka na? Ibahagi ang experience mo",
+    scroll_hint: "Alamin pa",
+    how_pill: "🗺️ Paano ito gumagana",
+    how_title: "Simple. Fun. IRL.",
+    how_body: "Hindi ito video game. Lalabas ka talaga. Maglalakad ka. Makakahanap ka ng bagay sa tunay na mundo — kasama ang iyong mga kaibigan.",
+    step1_title: "Kumuha ng indicio",
+    step1_body: "May photo ka matatanggap. Kilala mo ba ang lugar?",
+    step2_title: "Lumabas at hanapin",
+    step2_body: "Lakad, tumakbo, o sumakay kasama ang iyong barkada. Ang susunod na clue ay naghihintay.",
+    step3_title: "Pit stop sa lokal na tindahan",
+    step3_body: "Ang bawat clue ay nagdadala sa iyo sa isang lugar sa General Luna. Free drink. Susunod na clue.",
+    step4_title: "Hanap ang coffre — manalo!",
+    step4_body: "Una makarating sa huling lugar, siya ang nagdadala ng prize. Lahat ng naglaro ay nanalo ng something.",
+    hb_title: "Hanap app — coming soon",
+    hb_body: "Araw-araw. Bagong chest. Bagong adventure. Sa lahat ng barangay ng Siargao.",
+    wl_pill: "✉️ Maging una",
+    wl_title: "Sumali sa waitlist",
+    wl_body: "Kapag lumabas na ang app, ikaw ang unang makakaalam. Libre. Walang spam. Promise.",
+    tab_player: "🏹 Player ako",
+    tab_merchant: "🏪 May tindahan ako",
+    p_name_label: "Pangalan mo (o Hunter name)",
+    p_name_ph: "JM_Hunter999...",
+    p_phone_label: "Phone number (para ma-notify ka)",
+    p_brgy_label: "Saang barangay ka?",
+    p_style_label: "Kasama mo sa laro?",
+    p_solo: "Solo ako madalas",
+    p_barkada: "Kasama lagi ang barkada ko",
+    p_depende: "Depende sa araw",
+    p_submit: "I-notify ako kapag ready na! 🏴‍☠️",
+    p_success_title: "Panalo! Registered ka na.",
+    p_success_body: "Ikaw na ang isa sa mga unang Hunters ng Siargao. I-share mo ito sa iyong barkada!",
+    share_fb: "I-share sa Facebook 👥",
+    goto_q: "Nalaro ka? Ibahagi ang experience →",
+    m_card1_title: "Ang tindahan mo = treasure spot",
+    m_card1_body: "Ang mga players ng hanap ay darating sa iyong tindahan para hanapin ang susunod na clue — at mag-redeem ng rewards.",
+    m_card2_title: "Dashboard para sa iyo",
+    m_card2_body: "Makikita mo kung ilang players ang dumaan, anong oras, at kung gaano ka-epektibo ang iyong vouchers.",
+    m_card3_title: "Simula sa ₱500/buwan",
+    m_card3_body: "Para sa mga lokal na tindahan, café, surf shop, at activities. Trial period libre.",
+    m_name_label: "Pangalan ng tindahan",
+    m_name_ph: "Cloud 9 Café...",
+    m_type_label: "Uri ng tindahan",
+    m_phone_label: "Phone number / contact",
+    m_brgy_label: "Saang barangay?",
+    m_submit: "Gusto ko maging partner! 🏪",
+    m_success_title: "Salamat! Kukuha kami ng ugnayan.",
+    m_success_body: "Isa ka sa mga unang merchant partners ng hanap sa Siargao. Makikipag-ugnayan kami sa iyo para sa libreng trial.",
+    m_type_cafe: "Café / Restaurant",
+    m_type_surf: "Surf shop / Equipment rental",
+    m_type_accom: "Accommodation (hostel / resort)",
+    m_type_activity: "Activity / Tour",
+    m_type_sari: "Sari-sari store / Grocery",
+    m_type_other: "Iba pa",
+    opt_pick: "Piliin ang barangay mo",
+    opt_pick2: "Piliin",
+    opt_other_brgy: "Ibang barangay sa Siargao",
+    opt_tourist: "Tourist / Expat ako",
+    opt_other_area: "Ibang lugar",
+    q_pill: "📋 Nalaro ka na?",
+    q_title: "Ibahagi ang experience mo",
+    q_body: "2 minuto lang. Ang sagot mo ay makakatulong sa amin para gawing mas masaya ang hanap para sa lahat ng taga-Siargao.",
+    q1_label: "Tanong 1 / 5",
+    q1_title: "Gaano ka-saya ang laro? 🎯",
+    q2_label: "Tanong 2 / 5",
+    q2_title: "Anong pinaka-masaya para sa iyo?",
+    q2_opt1: "Ang pag-solve ng clues 🧩",
+    q2_opt2: "Ang pagtakbo at kumpetisyon 🏃",
+    q2_opt3: "Ang kasama ko (barkada feeling) 👥",
+    q2_opt4: "Ang pagdiskubre ng mga lugar 📍",
+    q2_opt5: "Lahat! 🎉",
+    q3_label: "Tanong 3 / 5",
+    q3_title: "Kung araw-araw may bagong treasure hunt sa Siargao...",
+    q3_opt1: "Lalaro ako araw-araw! 🔥",
+    q3_opt2: "Ilang beses sa linggo 📅",
+    q3_opt3: "Weekend lang 🌴",
+    q3_opt4: "Pag-may special event lang",
+    q4_label: "Tanong 4 / 5",
+    q4_title: "Anong pwedeng gawing mas masaya? 💡",
+    q4_ph: "Halimbawa: mas maraming players, ibang prizes...",
+    q5_label: "Tanong 5 / 5",
+    q5_title: "Sino ka? (Para ma-notify ka ng launch 🚀)",
+    q5_name_label: "Pangalan o Hunter name",
+    q5_name_ph: "Hal: JM_Hunter999",
+    q5_phone_label: "Phone number",
+    q5_brgy_label: "Barangay mo",
+    q_next: "Susunod →",
+    q_back: "← Bumalik",
+    q_submit: "Isumite! 🏴‍☠️",
+    q_success_title: "Salamat, Hunter!",
+    q_success_body: "Ang feedback mo ay makakatulong sa amin para gawing mas masaya ang hanap para sa buong Siargao. I-notify namin ikaw kapag lumabas na ang app.",
+    footer_copy: "© 2025 hanap · Mag-hunt. Manalo. Lumabas.",
+  },
+  en: {
+    nav_cta: "Join now →",
+    hero_tagline: "Hunt · Win · Go Outside",
+    hero_h1_1: "Something",
+    hero_h1_accent: " is hidden",
+    hero_h1_2: "in General Luna.",
+    hero_sub: "The first real-world treasure hunt game for Siargao locals. Real places. Real rewards. Get outside.",
+    hero_cta1: "I want to join! →",
+    hero_cta2: "Already played? Share your experience",
+    scroll_hint: "Learn more",
+    how_pill: "🗺️ How it works",
+    how_title: "Simple. Fun. IRL.",
+    how_body: "This isn't a video game. You'll go outside. Walk around. Find things in the real world — with your friends.",
+    step1_title: "Get a clue",
+    step1_body: "You'll receive a photo. Do you recognize the place?",
+    step2_title: "Go outside and find it",
+    step2_body: "Walk, run, or ride with your barkada. The next clue is waiting.",
+    step3_title: "Pit stop at a local shop",
+    step3_body: "Every clue takes you to a spot in General Luna. Free drink. Next clue.",
+    step4_title: "Find the chest — win!",
+    step4_body: "First group to reach the final spot wins the prize. Everyone who played wins something.",
+    hb_title: "Hanap app — coming soon",
+    hb_body: "Every day. New chest. New adventure. Across all barangays of Siargao.",
+    wl_pill: "✉️ Be first",
+    wl_title: "Join the waitlist",
+    wl_body: "When the app launches, you'll be the first to know. Free. No spam. Promise.",
+    tab_player: "🏹 I'm a player",
+    tab_merchant: "🏪 I own a business",
+    p_name_label: "Your name (or Hunter name)",
+    p_name_ph: "JM_Hunter999...",
+    p_phone_label: "Phone number (to notify you)",
+    p_brgy_label: "Which barangay are you from?",
+    p_style_label: "How do you prefer to play?",
+    p_solo: "Usually solo",
+    p_barkada: "Always with my barkada",
+    p_depende: "Depends on the day",
+    p_submit: "Notify me when it's ready! 🏴‍☠️",
+    p_success_title: "Let's go! You're registered.",
+    p_success_body: "You're one of the first Hunters in Siargao. Share this with your barkada!",
+    share_fb: "Share on Facebook 👥",
+    goto_q: "Already played? Share your experience →",
+    m_card1_title: "Your shop = a treasure spot",
+    m_card1_body: "hanap players will visit your shop to find the next clue — and redeem rewards.",
+    m_card2_title: "Your own dashboard",
+    m_card2_body: "See how many players visited, at what time, and how effective your vouchers are.",
+    m_card3_title: "Starting at ₱500/month",
+    m_card3_body: "For local shops, cafés, surf shops, and activities. Free trial period.",
+    m_name_label: "Shop name",
+    m_name_ph: "Cloud 9 Café...",
+    m_type_label: "Type of shop",
+    m_phone_label: "Phone number / contact",
+    m_brgy_label: "Which barangay?",
+    m_submit: "I want to be a partner! 🏪",
+    m_success_title: "Thank you! We'll be in touch.",
+    m_success_body: "You're one of hanap's first merchant partners in Siargao. We'll contact you soon for your free trial.",
+    m_type_cafe: "Café / Restaurant",
+    m_type_surf: "Surf shop / Equipment rental",
+    m_type_accom: "Accommodation (hostel / resort)",
+    m_type_activity: "Activity / Tour",
+    m_type_sari: "Sari-sari store / Grocery",
+    m_type_other: "Other",
+    opt_pick: "Select your barangay",
+    opt_pick2: "Select",
+    opt_other_brgy: "Other barangay in Siargao",
+    opt_tourist: "Tourist / Expat",
+    opt_other_area: "Other location",
+    q_pill: "📋 Already played?",
+    q_title: "Share your experience",
+    q_body: "2 minutes only. Your feedback helps us make hanap more fun for everyone in Siargao.",
+    q1_label: "Question 1 / 5",
+    q1_title: "How fun was it? 🎯",
+    q2_label: "Question 2 / 5",
+    q2_title: "What was the most fun part for you?",
+    q2_opt1: "Solving the clues 🧩",
+    q2_opt2: "Running and competing 🏃",
+    q2_opt3: "Being with my friends 👥",
+    q2_opt4: "Discovering new places 📍",
+    q2_opt5: "Everything! 🎉",
+    q3_label: "Question 3 / 5",
+    q3_title: "If there was a new treasure hunt every day in Siargao...",
+    q3_opt1: "I'd play every day! 🔥",
+    q3_opt2: "A few times a week 📅",
+    q3_opt3: "Weekends only 🌴",
+    q3_opt4: "Only for special events",
+    q4_label: "Question 4 / 5",
+    q4_title: "What would make it even more fun? 💡",
+    q4_ph: "e.g. more players, different prizes, more locations...",
+    q5_label: "Question 5 / 5",
+    q5_title: "Who are you? (So we can notify you at launch 🚀)",
+    q5_name_label: "Name or Hunter name",
+    q5_name_ph: "e.g. JM_Hunter999",
+    q5_phone_label: "Phone number",
+    q5_brgy_label: "Your barangay",
+    q_next: "Next →",
+    q_back: "← Back",
+    q_submit: "Submit! 🏴‍☠️",
+    q_success_title: "Thanks, Hunter!",
+    q_success_body: "Your feedback helps us make hanap more fun for everyone in Siargao. We'll notify you when the app launches.",
+    footer_copy: "© 2025 hanap · Hunt. Win. Go Outside.",
+  }
+};
+
+/* ─────────────────────────────────────────────
+   LANGUAGE ENGINE
+───────────────────────────────────────────── */
+let currentLang = 'tl';
+
+function setLang(lang, btn) {
+  currentLang = lang;
+  document.documentElement.lang = lang;
+
+  // Toggle button active state
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  // Update all text nodes with data-i
+  document.querySelectorAll('[data-i]').forEach(el => {
+    const key = el.getAttribute('data-i');
+    if (T[lang][key] !== undefined) el.textContent = T[lang][key];
+  });
+
+  // Update placeholders
+  document.querySelectorAll('[data-i-ph]').forEach(el => {
+    const key = el.getAttribute('data-i-ph');
+    if (T[lang][key] !== undefined) el.placeholder = T[lang][key];
+  });
+
+  // Update page title and meta
+  document.title = lang === 'tl'
+    ? 'hanap — Mag-hunt. Manalo. Lumabas.'
+    : 'hanap — Hunt. Win. Go Outside.';
+}
+
+/* ─────────────────────────────────────────────
+   STARS
+───────────────────────────────────────────── */
+(function() {
+  const c = document.getElementById('stars');
+  for (let i = 0; i < 55; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const sz = Math.random() > 0.7 ? 3 : 2;
+    s.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*100}%;
+      width:${sz}px;height:${sz}px;
+      --d:${2+Math.random()*4}s;--delay:${Math.random()*6}s;--op:${0.18+Math.random()*0.45};`;
+    c.appendChild(s);
+  }
+})();
+
+/* ─────────────────────────────────────────────
+   UI HELPERS
+───────────────────────────────────────────── */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const t = document.querySelector(a.getAttribute('href'));
+    if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function selectRadio(el) {
+  const name = el.querySelector('input').name;
+  document.querySelectorAll(`input[name="${name}"]`).forEach(i => {
+    i.closest('.radio-option')?.classList.remove('selected');
+  });
+  el.classList.add('selected');
+  el.querySelector('input').checked = true;
+}
+
+/* ─────────────────────────────────────────────
+   STAR RATING
+───────────────────────────────────────────── */
+let currentRating = 0;
+function setRating(val) {
+  currentRating = val;
+  document.querySelectorAll('.star-btn').forEach((b, i) => b.classList.toggle('selected', i < val));
+  document.getElementById('btn-step-1').disabled = false;
+}
+
+/* ─────────────────────────────────────────────
+   QUESTIONNAIRE STEPS
+───────────────────────────────────────────── */
+let currentStep = 1;
+
+function nextStep(n) {
+  document.getElementById('q-step-' + currentStep).classList.remove('active');
+  document.getElementById('dot-' + currentStep).classList.add('done');
+  currentStep = n;
+  document.getElementById('q-step-' + n).classList.add('active');
+  document.getElementById('dot-' + n)?.classList.add('done');
+  document.querySelector('.form-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function prevStep(n) {
+  document.getElementById('q-step-' + currentStep).classList.remove('active');
+  document.getElementById('dot-' + (currentStep)).classList.remove('done');
+  currentStep = n;
+  document.getElementById('q-step-' + n).classList.add('active');
+}
+
+/* ─────────────────────────────────────────────
+   SUBMIT HANDLERS
+───────────────────────────────────────────── */
+function saveLocally(data) {
+  try {
+    const existing = JSON.parse(localStorage.getItem('hanap_submissions') || '[]');
+    existing.push(data);
+    localStorage.setItem('hanap_submissions', JSON.stringify(existing));
+  } catch(e) {}
+}
+
+function submitPlayer() {
+  const name = document.getElementById('player-name').value.trim();
+  const phone = document.getElementById('player-phone').value.trim();
+  if (!name && !phone) {
+    alert(currentLang === 'tl' ? 'Lagyan mo ng pangalan o phone number mo.' : 'Please enter your name or phone number.');
+    return;
+  }
+  const data = {
+    type: 'player_waitlist', lang: currentLang,
+    timestamp: new Date().toISOString(),
+    name, phone,
+    barangay: document.getElementById('player-barangay').value,
+    play_style: document.querySelector('input[name="play-style"]:checked')?.value || '',
+  };
+  saveLocally(data);
+  console.log('[hanap] Player signup:', data);
+  document.getElementById('player-form-wrap').style.display = 'none';
+  document.getElementById('player-success').classList.add('show');
+
+  // Uncomment to connect backend:
+  // fetch('/api/signup', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data) });
+}
+
+function submitMerchant() {
+  const name = document.getElementById('merchant-name').value.trim();
+  if (!name) {
+    alert(currentLang === 'tl' ? 'Lagyan mo ng pangalan ng tindahan mo.' : 'Please enter your shop name.');
+    return;
+  }
+  const data = {
+    type: 'merchant_interest', lang: currentLang,
+    timestamp: new Date().toISOString(),
+    name, phone: document.getElementById('merchant-phone').value,
+    merchant_type: document.getElementById('merchant-type').value,
+    barangay: document.getElementById('merchant-barangay').value,
+  };
+  saveLocally(data);
+  console.log('[hanap] Merchant signup:', data);
+  document.getElementById('merchant-form-wrap').style.display = 'none';
+  document.getElementById('merchant-success').classList.add('show');
+}
+
+function submitQuestionnaire() {
+  const data = {
+    type: 'questionnaire', lang: currentLang,
+    timestamp: new Date().toISOString(),
+    rating: currentRating,
+    fun_part: document.querySelector('input[name="fun-part"]:checked')?.value || '',
+    daily_intent: document.querySelector('input[name="daily"]:checked')?.value || '',
+    suggestion: document.getElementById('suggestion-text').value,
+    name: document.getElementById('q-name').value,
+    phone: document.getElementById('q-phone').value,
+    barangay: document.getElementById('q-barangay').value,
+  };
+  saveLocally(data);
+  console.log('[hanap] Questionnaire:', data);
+  document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.progress-dot').forEach(d => d.classList.add('done'));
+  document.getElementById('q-success').classList.add('show');
+  setTimeout(() => document.getElementById('q-success').scrollIntoView({ behavior: 'smooth', block: 'center' }), 200);
+}
+
+// Dev helper: type showData() in the browser console to see all submissions
+window.showData = () => {
+  const d = JSON.parse(localStorage.getItem('hanap_submissions') || '[]');
+  console.table(d);
+  return d;
+};
+</script>
+</body>
+</html>
