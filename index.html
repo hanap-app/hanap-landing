@@ -923,7 +923,7 @@ function submitPlayer() {
 
   fetch('https://formspree.io/f/xvznvezj', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
   }).catch(e => console.warn('Formspree error:', e));
 
@@ -949,7 +949,7 @@ function submitMerchant() {
 
   fetch('https://formspree.io/f/mjgdpnyg', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
   }).catch(e => console.warn('Formspree error:', e));
 
@@ -974,7 +974,7 @@ function submitQuestionnaire() {
 
   fetch('https://formspree.io/f/mzdqknej', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
   }).catch(e => console.warn('Formspree error:', e));
 
