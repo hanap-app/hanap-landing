@@ -251,6 +251,7 @@ footer { border-top:1px solid var(--border); padding:30px 20px; text-align:cente
   *, *::before, *::after { animation-duration:0.01ms !important; }
 }
 </style>
+<script src="https://unpkg.com/@formspree/ajax@1" defer></script>
 </head>
 <body>
 
@@ -911,24 +912,14 @@ function submitPlayer() {
     alert(currentLang === 'tl' ? 'Lagyan mo ng pangalan o phone number mo.' : 'Please enter your name or phone number.');
     return;
   }
-  const data = {
-    type: 'player_waitlist', lang: currentLang,
-    timestamp: new Date().toISOString(),
-    name, phone,
-    barangay: document.getElementById('player-barangay').value,
-    play_style: document.querySelector('input[name="play-style"]:checked')?.value || '',
-  };
-  saveLocally(data);
-  console.log('[hanap] Player signup:', data);
-
-  fetch('https://formspree.io/f/xvznvezj', {
-    method: 'POST',
-    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  })
-  .then(r => { console.log('[hanap] Player submit status:', r.status); })
-  .catch(e => { console.warn('[hanap] Player submit error:', e); });
-
+  // Populate hidden Formspree form
+  document.getElementById('fs-p-name').value = name;
+  document.getElementById('fs-p-phone').value = phone;
+  document.getElementById('fs-p-barangay').value = document.getElementById('player-barangay').value;
+  document.getElementById('fs-p-style').value = document.querySelector('input[name="play-style"]:checked')?.value || '';
+  // Submit via Formspree SDK
+  document.querySelector('#fs-player [data-fs-submit-btn]').click();
+  console.log('[hanap] Player signup sent');
   document.getElementById('player-form-wrap').style.display = 'none';
   document.getElementById('player-success').classList.add('show');
 }
@@ -939,47 +930,26 @@ function submitMerchant() {
     alert(currentLang === 'tl' ? 'Lagyan mo ng pangalan ng tindahan mo.' : 'Please enter your shop name.');
     return;
   }
-  const data = {
-    type: 'merchant_interest', lang: currentLang,
-    timestamp: new Date().toISOString(),
-    name, phone: document.getElementById('merchant-phone').value,
-    merchant_type: document.getElementById('merchant-type').value,
-    barangay: document.getElementById('merchant-barangay').value,
-  };
-  saveLocally(data);
-  console.log('[hanap] Merchant signup:', data);
-
-  fetch('https://formspree.io/f/mjgdpnyg', {
-    method: 'POST',
-    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  }).then(r => console.log('[hanap] Merchant submit status:', r.status)).catch(e => console.warn('[hanap] Merchant submit error:', e));
-
+  document.getElementById('fs-m-name').value = name;
+  document.getElementById('fs-m-phone').value = document.getElementById('merchant-phone').value;
+  document.getElementById('fs-m-type').value = document.getElementById('merchant-type').value;
+  document.getElementById('fs-m-barangay').value = document.getElementById('merchant-barangay').value;
+  document.querySelector('#fs-merchant [data-fs-submit-btn]').click();
+  console.log('[hanap] Merchant signup sent');
   document.getElementById('merchant-form-wrap').style.display = 'none';
   document.getElementById('merchant-success').classList.add('show');
 }
 
 function submitQuestionnaire() {
-  const data = {
-    type: 'questionnaire', lang: currentLang,
-    timestamp: new Date().toISOString(),
-    rating: currentRating,
-    fun_part: document.querySelector('input[name="fun-part"]:checked')?.value || '',
-    daily_intent: document.querySelector('input[name="daily"]:checked')?.value || '',
-    suggestion: document.getElementById('suggestion-text').value,
-    name: document.getElementById('q-name').value,
-    phone: document.getElementById('q-phone').value,
-    barangay: document.getElementById('q-barangay').value,
-  };
-  saveLocally(data);
-  console.log('[hanap] Questionnaire:', data);
-
-  fetch('https://formspree.io/f/mzdqknej', {
-    method: 'POST',
-    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  }).then(r => console.log('[hanap] Questionnaire submit status:', r.status)).catch(e => console.warn('[hanap] Questionnaire submit error:', e));
-
+  document.getElementById('fs-q-rating').value = currentRating;
+  document.getElementById('fs-q-fun').value = document.querySelector('input[name="fun-part"]:checked')?.value || '';
+  document.getElementById('fs-q-daily').value = document.querySelector('input[name="daily"]:checked')?.value || '';
+  document.getElementById('fs-q-suggestion').value = document.getElementById('suggestion-text').value;
+  document.getElementById('fs-q-name').value = document.getElementById('q-name').value;
+  document.getElementById('fs-q-phone').value = document.getElementById('q-phone').value;
+  document.getElementById('fs-q-barangay').value = document.getElementById('q-barangay').value;
+  document.querySelector('#fs-questionnaire [data-fs-submit-btn]').click();
+  console.log('[hanap] Questionnaire sent');
   document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.progress-dot').forEach(d => d.classList.add('done'));
   document.getElementById('q-success').classList.add('show');
@@ -993,5 +963,43 @@ window.showData = () => {
   return d;
 };
 </script>
+<script>
+  window.formspree = window.formspree || function () { (formspree.q = formspree.q || []).push(arguments); };
+  document.addEventListener('DOMContentLoaded', function() {
+    formspree('initForm', { formElement: '#fs-player', formId: 'xvznvezj' });
+    formspree('initForm', { formElement: '#fs-merchant', formId: 'mjgdpnyg' });
+    formspree('initForm', { formElement: '#fs-questionnaire', formId: 'mzdqknej' });
+  });
+</script>
+
+<!-- Hidden Formspree forms -->
+<form id="fs-player" style="display:none">
+  <input name="type" value="player_waitlist">
+  <input name="name" id="fs-p-name">
+  <input name="phone" id="fs-p-phone">
+  <input name="barangay" id="fs-p-barangay">
+  <input name="play_style" id="fs-p-style">
+  <button data-fs-submit-btn type="submit"></button>
+</form>
+<form id="fs-merchant" style="display:none">
+  <input name="type" value="merchant_interest">
+  <input name="name" id="fs-m-name">
+  <input name="phone" id="fs-m-phone">
+  <input name="merchant_type" id="fs-m-type">
+  <input name="barangay" id="fs-m-barangay">
+  <button data-fs-submit-btn type="submit"></button>
+</form>
+<form id="fs-questionnaire" style="display:none">
+  <input name="type" value="questionnaire">
+  <input name="rating" id="fs-q-rating">
+  <input name="fun_part" id="fs-q-fun">
+  <input name="daily_intent" id="fs-q-daily">
+  <input name="suggestion" id="fs-q-suggestion">
+  <input name="name" id="fs-q-name">
+  <input name="phone" id="fs-q-phone">
+  <input name="barangay" id="fs-q-barangay">
+  <button data-fs-submit-btn type="submit"></button>
+</form>
+
 </body>
 </html>
