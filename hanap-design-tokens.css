@@ -1,0 +1,117 @@
+/* ============================================
+   HANAP — Design Tokens
+   Treasure Hunt PH · v1.0
+   ============================================ */
+
+:root {
+
+  /* --- COLORS: Primary --- */
+  --hanap-flame:   #FF5C2E;   /* CTA, accent, logo, urgent alerts */
+  --hanap-night:   #0D1117;   /* Gameplay map background */
+  --hanap-ocean:   #1E3A5F;   /* Secondary dark surfaces */
+  --hanap-sand:    #F5F0E8;   /* Light mode bg, B2B dashboard */
+  --hanap-jungle:  #A6C97B;   /* Success, active streak, claim validated */
+  --hanap-gold:    #FFD700;   /* Gold accent (secondary use only) */
+  --hanap-legend:  #C084FC;   /* Legendary rarity */
+
+  /* --- COLORS: Chest Rarity --- */
+  --chest-wood:    #8B6914;   /* 🪵 Common */
+  --chest-silver:  #B0C4D8;   /* ⚪ Uncommon */
+  --chest-gold:    #FFD700;   /* 🟡 Rare */
+  --chest-legend:  #C084FC;   /* 🟣 Legendary */
+
+  /* --- COLORS: Functional --- */
+  --hanap-error:   #FF4444;   /* Errors, GPS missing, expiry */
+  --hanap-warning: #FF9500;   /* Streak warning, <5min remaining */
+  --hanap-success: #A6C97B;   /* Claim success, checkpoint validated */
+  --hanap-info:    #4A9EFF;   /* Info, player position on map */
+
+  /* --- TYPOGRAPHY --- */
+  --font-display:  'Nunito', system-ui, sans-serif;
+  --font-body:     'Inter', system-ui, sans-serif;
+
+  /* --- TYPE SCALE --- */
+  --text-display:  clamp(32px, 5vw, 40px);   /* Scores, victories — Nunito 900 */
+  --text-h1:       clamp(22px, 4vw, 28px);   /* Screen titles — Nunito 800 */
+  --text-h2:       clamp(16px, 3vw, 18px);   /* Subsections — Inter 600 */
+  --text-body:     14px;                      /* Descriptions — Inter 400 */
+  --text-ui:       12px;                      /* Buttons, badges — Inter 500 */
+  --text-caption:  11px;                      /* Distances, timestamps — Inter 400 */
+  --text-shout:    15px;                      /* Taglish urgent alerts — Nunito 900 */
+
+  /* --- SPACING --- */
+  --space-xs:   4px;
+  --space-sm:   8px;
+  --space-md:   12px;
+  --space-lg:   16px;
+  --space-xl:   24px;
+  --space-2xl:  32px;
+
+  /* --- BORDER RADIUS --- */
+  --radius-sm:   8px;
+  --radius-md:   12px;
+  --radius-lg:   20px;
+  --radius-full: 999px;
+
+  /* --- COMPONENTS --- */
+  --cta-height:       52px;       /* Min touch target for primary CTA */
+  --cta-font-size:    16px;
+  --cta-font-weight:  700;
+  --cta-radius:       12px;
+  --card-padding:     14px 16px;
+  --input-height:     48px;
+
+  /* --- SHADOWS (dark mode) --- */
+  --shadow-chest:  0 0 12px rgba(255, 92, 46, 0.4);    /* Flame glow on active chest */
+  --shadow-card:   0 2px 12px rgba(0, 0, 0, 0.4);
+
+  /* --- TRANSITIONS --- */
+  --transition-fast:   120ms ease-out;   /* Button press */
+  --transition-normal: 220ms ease-out;   /* Card appear */
+  --transition-slow:   400ms ease-out;   /* Screen transition */
+}
+
+/* ============================================
+   DARK MODE (Gameplay)
+   Background: --hanap-night
+   ============================================ */
+.mode-gameplay {
+  background-color: var(--hanap-night);
+  color: var(--hanap-sand);
+}
+
+/* ============================================
+   LIGHT MODE (Onboarding / B2B Dashboard)
+   Background: --hanap-sand
+   ============================================ */
+.mode-b2b {
+  background-color: var(--hanap-sand);
+  color: var(--hanap-night);
+}
+
+/* ============================================
+   PRIMARY CTA BUTTON
+   Only one visible at a time on gameplay screens
+   ============================================ */
+.btn-primary {
+  width: 100%;
+  height: var(--cta-height);
+  background-color: var(--hanap-flame);
+  color: #FFFFFF;
+  font-family: var(--font-body);
+  font-size: var(--cta-font-size);
+  font-weight: var(--cta-font-weight);
+  border-radius: var(--cta-radius);
+  border: none;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+}
+
+/* ============================================
+   CHEST RARITY INDICATORS
+   Color alone communicates rarity — no text needed
+   ============================================ */
+.chest--wood   { border-color: var(--chest-wood);   background: rgba(139, 105, 20, 0.15); }
+.chest--silver { border-color: var(--chest-silver); background: rgba(176, 196, 216, 0.15); }
+.chest--gold   { border-color: var(--chest-gold);   background: rgba(255, 215, 0, 0.15); }
+.chest--legend { border-color: var(--chest-legend); background: rgba(192, 132, 252, 0.15); }
